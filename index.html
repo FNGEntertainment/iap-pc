@@ -1,1 +1,61 @@
-<h1>Github pages</h1>
+html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integración con Mercado Pago</title>
+    <script src="https://sdk.mercadopago.com/js/v2"></script> <!-- Script de Mercado Pago -->
+</head>
+<body>
+    <h1>Formulario de Pago</h1>
+
+    <!-- Botón de pago -->
+    <div id="button-checkout"></div>
+
+    <script>
+        // Inicializar el SDK de Mercado Pago con tu Access Token (sandbox o producción)
+        const mp = new MercadoPago('TU_ACCESS_TOKEN', {
+            locale: 'es-AR' // Puedes cambiar el idioma
+        });
+
+        // Crear el objeto de preferencia (detalles del pago)
+        const preference = {
+            items: [
+                {
+                    title: 'Producto de prueba',
+                    quantity: 1,
+                    currency_id: 'ARS',
+                    unit_price: 100.00 // Precio del producto
+                }
+            ],
+            back_urls: {
+                "success": "http://www.tu-sitio.com/success",  // URL de éxito
+                "failure": "http://www.tu-sitio.com/failure",  // URL de error
+                "pending": "http://www.tu-sitio.com/pending"   // URL en caso de transacción pendiente
+            },
+            auto_return: 'approved' // Regresar automáticamente a la URL de éxito después de la compra
+        };
+
+        // Crear la preferencia en Mercado Pago
+        mp.preferences.create(preference)
+            .then(function(response) {
+                const id = response.body.id;
+                
+                // Crear el botón de pago con el ID de la preferencia
+                mp.checkout({
+                    preference: {
+                        id: id
+                    },
+                    render: {
+                        container: '#button-checkout',  // ID del contenedor donde se mostrará el botón
+                        label: 'Pagar con Mercado Pago'  // Texto que aparecerá en el botón
+                    }
+                });
+            })
+            .catch(function(error) {
+                console.error("Error al crear la preferencia: ", error);
+            });
+    </script>
+</body>
+</html>
