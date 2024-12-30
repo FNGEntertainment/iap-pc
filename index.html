@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integración con Mercado Pago</title>
-    <script src="https://sdk.mercadopago.com/js/v2"></script> <!-- Script de Mercado Pago -->
+    <title>Pago con Mercado Pago (Test)</title>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
 </head>
 <body>
     <h1>Formulario de Pago</h1>
@@ -13,12 +13,12 @@
     <div id="button-checkout"></div>
 
     <script>
-        // Inicializar el SDK de Mercado Pago con tu Access Token (sandbox o producción)
-        const mp = new MercadoPago('TU_ACCESS_TOKEN', {
-            locale: 'es-AR' // Puedes cambiar el idioma
+        // Inicializar el SDK de Mercado Pago con tu Public Key (sandbox para pruebas)
+        const mp = new MercadoPago('TU_PUBLIC_KEY', {
+            locale: 'es-AR'
         });
 
-        // Crear el objeto de preferencia (detalles del pago)
+        // Crear el objeto de preferencia directamente en el script
         const preference = {
             items: [
                 {
@@ -33,28 +33,34 @@
                 "failure": "http://www.tu-sitio.com/failure",  // URL de error
                 "pending": "http://www.tu-sitio.com/pending"   // URL en caso de transacción pendiente
             },
-            auto_return: 'approved' // Regresar automáticamente a la URL de éxito después de la compra
+            auto_return: 'approved'
         };
 
-        // Crear la preferencia en Mercado Pago
-        mp.preferences.create(preference)
-            .then(function(response) {
-                const id = response.body.id;
-                
-                // Crear el botón de pago con el ID de la preferencia
-                mp.checkout({
-                    preference: {
-                        id: id
-                    },
-                    render: {
-                        container: '#button-checkout',  // ID del contenedor donde se mostrará el botón
-                        label: 'Pagar con Mercado Pago'  // Texto que aparecerá en el botón
-                    }
-                });
-            })
-            .catch(function(error) {
-                console.error("Error al crear la preferencia: ", error);
+        // En pruebas, puedes usar fetch para llamar directamente a la API de Mercado Pago
+        fetch('https://api.mercadopago.com/checkout/preferences', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer TU_ACCESS_TOKEN' // Access Token para pruebas
+            },
+            body: JSON.stringify(preference)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Crear el botón de pago con el ID de la preferencia
+            mp.checkout({
+                preference: {
+                    id: data.id
+                },
+                render: {
+                    container: '#button-checkout',  // ID del contenedor para el botón
+                    label: 'Pagar con Mercado Pago' // Texto del botón
+                }
             });
+        })
+        .catch(error => {
+            console.error("Error al crear la preferencia:", error);
+        });
     </script>
 </body>
 </html>
